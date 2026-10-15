@@ -383,12 +383,12 @@
     }
   }
 
-  function removeEntity(name) {
+  async function removeEntity(name) {
     const refs = DM.findReferences(state.model, name).filter((r) => !r.startsWith(name + '.'));
     const msg = refs.length
-      ? 'Entität „' + name + '“ wird noch verwendet in:\n' + refs.join('\n') + '\n\nTrotzdem löschen?'
-      : 'Entität „' + name + '“ löschen?';
-    if (!confirm(msg)) return;
+      ? 'Entität „' + name + '“ wird noch verwendet in: ' + refs.join(', ') + '. Die Verweise werden dann ungültig.'
+      : 'Entität „' + name + '“ wird mit allen Eigenschaften entfernt.';
+    if (!(await ask('Entität löschen?', msg, 'Löschen', true))) return;
     const names = Object.keys(state.model.$defs);
     const idx = names.indexOf(name);
     DM.deleteEntity(state.model, name);
@@ -436,8 +436,8 @@
         commit();
       }),
       h('span', { class: 'center' }, desc.kind === 'custom' ? '–' :
-        checkbox(key + '.list', desc.list, (v) => applyType({ list: v }), null, 'Liste (array)')),
-      h('span', { class: 'center' }, checkbox(key + '.req', required, (v) => DM.setRequired(e, pname, v), null, 'Pflichtfeld')),
+        checkbox(key + '.list', desc.list, (v) => applyType({ list: v }), 'Liste', 'Liste (array)')),
+      h('span', { class: 'center' }, checkbox(key + '.req', required, (v) => DM.setRequired(e, pname, v), 'Pflicht', 'Pflichtfeld')),
       text(key + '.desc', ps.description, (v) => setOrDelete(e.properties[pname], 'description', v), { placeholder: 'Beschreibung', 'aria-label': 'Beschreibung' }),
       h('span', { class: 'row-actions' },
         h('button', { class: 'icon' + (open ? ' active' : ''), title: 'Details', 'aria-expanded': open,
@@ -578,7 +578,7 @@
       h('div', { class: 'section-head' },
         h('h1', {}, 'JSON Schema'),
         h('span', { class: 'spacer' }),
-        h('button', { onclick: () => { navigator.clipboard.writeText(ta.value).then(() => toast('In Zwischenablage kopiert')); } }, 'Kopieren'),
+        h('button', { onclick: () => copyText(ta.value, ta) }, 'Kopieren'),
         h('button', { class: 'primary', onclick: () => {
           try {
             state.model = DM.normalizeModel(JSON.parse(ta.value));
@@ -603,7 +603,7 @@
         h('select', { onchange: (e) => { state.exampleEntity = e.target.value; render(); } },
           names.map((n) => h('option', { value: n, selected: n === state.exampleEntity }, n))),
         h('span', { class: 'spacer' }),
-        h('button', { onclick: () => navigator.clipboard.writeText(json).then(() => toast('In Zwischenablage kopiert')) }, 'Kopieren')),
+        h('button', { onclick: () => copyText(json) }, 'Kopieren')),
       h('p', { class: 'muted small' }, 'Automatisch aus dem Schema erzeugt (Standardwerte, Beispiele, Aufzählungen und Formate werden berücksichtigt).'),
       h('pre', { class: 'code' }, json));
   }
@@ -646,11 +646,47 @@
     setTimeout(() => { const i = document.querySelector('[data-key="e.name"]'); if (i) { i.focus(); i.select(); } }, 10);
   }
 
+  /** Bietet ein Dokument zum Kopieren oder Herunterladen an. */
   function download(name, data) {
-    const blob = new Blob([JSON.stringify(data, null, 2) + '\n'], { type: 'application/json' });
-    const a = h('a', { href: URL.createObjectURL(blob), download: name });
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    const content = JSON.stringify(data, null, 2) + '\n';
+    const dlg = $('#exportDialog');
+    $('#exportName').textContent = name;
+    const ta = $('#exportText');
+    ta.value = content;
+    ta.scrollTop = 0;
+    $('#exportCopy').onclick = () => copyText(content, ta);
+    $('#exportDownload').onclick = () => {
+      const blob = new Blob([content], { type: 'application/json' });
+      const a = h('a', { href: URL.createObjectURL(blob), download: name });
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    };
+    dlg.showModal();
+    ta.scrollTop = 0;
+  }
+
+  function copyText(value, fallbackField) {
+    const done = () => toast('In Zwischenablage kopiert');
+    const fallback = () => {
+      if (fallbackField) { fallbackField.focus(); fallbackField.select(); }
+      toast('Text ist markiert – bitte manuell kopieren.');
+    };
+    try { navigator.clipboard.writeText(value).then(done, fallback); } catch (e) { fallback(); }
+  }
+
+  /** Bestätigungsdialog innerhalb der Seite (statt window.confirm). */
+  function ask(title, message, okLabel = 'OK', danger = false) {
+    const dlg = $('#askDialog');
+    $('#askTitle').textContent = title;
+    $('#askText').textContent = message;
+    const ok = $('#askOk');
+    ok.textContent = okLabel;
+    ok.className = danger ? 'primary danger-fill' : 'primary';
+    return new Promise((resolve) => {
+      dlg.onclose = () => resolve(dlg.returnValue === 'ok');
+      dlg.returnValue = '';
+      dlg.showModal();
+    });
   }
 
   function baseName() {
@@ -678,9 +714,7 @@
         state.fileHandle = null;
       }
     }
-    const name = baseName() + '.schema.json';
-    download(name, data);
-    state.fileName = name; persist(); renderHeader();
+    download(baseName() + '.schema.json', data);
   }
 
   async function open() {
@@ -706,22 +740,24 @@
     });
   }
 
-  function confirmDiscard() {
-    return !state.undo.length || confirm('Ungespeicherte Änderungen verwerfen?');
+  async function confirmDiscard() {
+    return !state.undo.length ||
+      ask('Änderungen verwerfen?', 'Das aktuelle Modell wird ersetzt. Speichere es vorher, wenn du es behalten möchtest.', 'Verwerfen', true);
   }
 
-  async function loadSample() {
-    if (!confirmDiscard()) return;
+  async function loadSample(skipConfirm) {
+    if (skipConfirm !== true && !(await confirmDiscard())) return false;
     let doc;
     try {
       const res = await fetch('examples/bibliothek.schema.json');
       doc = await res.json();
     } catch (e) {
-      toast('Beispiel konnte nicht geladen werden (Seite über einen Webserver öffnen).', 'error');
-      return;
+      if (skipConfirm !== true) toast('Beispiel konnte nicht geladen werden (Seite über einen Webserver öffnen).', 'error');
+      return false;
     }
     loadModel(doc, '');
     toast('Beispielmodell geladen');
+    return true;
   }
 
   function exportAs(kind) {
@@ -740,12 +776,12 @@
   // ---------------------------------------------------------------------------
 
   function bind() {
-    $('#btnNew').onclick = () => { if (confirmDiscard()) loadModel(DM.createModel()); };
+    $('#btnNew').onclick = async () => { if (await confirmDiscard()) loadModel(DM.createModel()); };
     $('#btnOpen').onclick = open;
     $('#btnSave').onclick = save;
     $('#btnUndo').onclick = undo;
     $('#btnRedo').onclick = redo;
-    $('#btnSample').onclick = loadSample;
+    $('#btnSample').onclick = () => loadSample();
     $('#btnAddEntity').onclick = addEntity;
     $('#navModel').onclick = () => select(null);
     $('#entityFilter').oninput = (e) => { state.filter = e.target.value; renderSidebar(); };
@@ -777,7 +813,7 @@
     document.addEventListener('drop', (e) => {
       e.preventDefault(); document.body.classList.remove('dragging');
       const f = e.dataTransfer.files[0];
-      if (f && confirmDiscard()) readFile(f);
+      if (f) confirmDiscard().then((ok) => ok && readFile(f));
     });
   }
 
@@ -788,7 +824,9 @@
     if (restored && restored.model) {
       try { loadModel(restored.model, restored.fileName || ''); return; } catch (e) { /* neu anfangen */ }
     }
+    // Erster Start: mit dem Beispielmodell beginnen, damit man gleich etwas sieht.
     loadModel(DM.createModel());
+    loadSample(true);
   }
 
   init();

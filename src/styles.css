@@ -12,10 +12,10 @@
   --ok: #2f855a;
   --radius: 6px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  color-scheme: light dark;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #14171c;
     --surface: #1c2027;
     --surface-2: #242a33;
@@ -27,8 +27,24 @@
     --danger: #f07171;
     --warn: #e0b354;
     --ok: #63c08a;
+    color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --bg: #14171c;
+  --surface: #1c2027;
+  --surface-2: #242a33;
+  --border: #333a46;
+  --text: #e3e7ee;
+  --muted: #96a0b2;
+  --accent: #63a4ea;
+  --accent-soft: #1f3550;
+  --danger: #f07171;
+  --warn: #e0b354;
+  --ok: #63c08a;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
@@ -78,7 +94,8 @@ textarea { resize: vertical; }
 /* Kopfzeile */
 .topbar {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
+  padding-block: 8px; background: var(--surface); border-bottom: 1px solid var(--border);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   flex-wrap: wrap;
 }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
@@ -160,6 +177,7 @@ h2 { font-size: 16px; margin: 22px 0 10px; }
 .prop-group > .prop-row { border-top: 0; }
 .prop-row.open { background: var(--accent-soft); }
 .center { display: flex; justify-content: center; }
+.prop-row .check span { display: none; }
 .row-actions { display: flex; justify-content: flex-end; gap: 2px; }
 .prop-details { padding: 8px 14px 12px; border-top: 1px dashed var(--border); }
 details.raw summary { cursor: pointer; color: var(--muted); font-size: 13px; margin: 6px 0; }
@@ -201,7 +219,7 @@ svg.diagram { display: block; user-select: none; }
 .arrow-head { fill: var(--muted); }
 
 .toast {
-  position: fixed; bottom: 20px; left: 50%; transform: translate(-50%, 30px); opacity: 0; pointer-events: none;
+  position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translate(-50%, 30px); opacity: 0; pointer-events: none;
   background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: var(--radius); transition: .2s; z-index: 50;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -212,10 +230,39 @@ svg.diagram { display: block; user-select: none; }
   .issues { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); max-height: 200px; }
 }
 @media (max-width: 760px) {
+  /* iOS zoomt bei Eingabefeldern unter 16px automatisch hinein. */
+  input[type=text], input[type=number], input[type=search], select, textarea { font-size: 16px; }
   .layout { grid-template-columns: 1fr; }
+  .layout > * { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .tabs { overflow-x: auto; }
+  html, body { height: auto; }
+  .layout { display: flex; flex-direction: column; }
+  .view { overflow: visible; }
+  .tabs button { flex: none; }
+  .topbar .brand .file-name { display: none; }
+  .section-head { flex-wrap: wrap; }
+  .prop-row > input[type=text]:last-of-type { grid-column: 1 / -1; }
+  .row-actions { grid-column: 1 / -1; }
   .sidebar { border-right: 0; border-bottom: 1px solid var(--border); max-height: 220px; }
-  .view { padding: 14px 16px 40px; }
+  .view { padding: 14px 0 40px; }
+  .prop-row .check span { display: inline; font-size: 14px; color: var(--muted); }
+  .center { justify-content: flex-start; }
   .grid2, .grid4 { grid-template-columns: 1fr; }
   .prop-row { grid-template-columns: 1fr 1fr; }
   .prop-header { display: none; }
 }
+
+/* Dialoge */
+dialog {
+  border: 1px solid var(--border); border-radius: 10px; padding: 0;
+  background: var(--surface); color: var(--text);
+  width: min(440px, calc(100vw - 32px)); box-shadow: 0 16px 48px rgba(0,0,0,.25);
+}
+dialog.wide { width: min(820px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(10, 14, 22, .45); }
+dialog form { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; }
+dialog h2 { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+dialog p { margin: 0; color: var(--muted); }
+dialog textarea { width: 100%; min-height: 40vh; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+button.danger-fill { background: var(--danger); border-color: var(--danger); color: #fff; }

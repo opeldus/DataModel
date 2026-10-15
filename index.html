@@ -64,6 +64,29 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <dialog id="askDialog" aria-labelledby="askTitle">
+    <form method="dialog">
+      <h2 id="askTitle"></h2>
+      <p id="askText"></p>
+      <div class="dialog-actions">
+        <button value="cancel" id="askCancel">Abbrechen</button>
+        <button value="ok" id="askOk" class="primary">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="exportDialog" class="wide" aria-labelledby="exportTitle">
+    <form method="dialog">
+      <h2 id="exportTitle">Export: <span id="exportName"></span></h2>
+      <textarea id="exportText" class="code" rows="16" readonly spellcheck="false"></textarea>
+      <div class="dialog-actions">
+        <button value="close">Schließen</button>
+        <button type="button" id="exportDownload">Herunterladen</button>
+        <button type="button" id="exportCopy" class="primary">Kopieren</button>
+      </div>
+    </form>
+  </dialog>
+
   <script src="src/model.js"></script>
   <script src="src/diagram.js"></script>
   <script src="src/app.js"></script>
