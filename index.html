@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datenmodell-Editor</title>
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">{ }</span>
+      <span>Datenmodell-Editor</span>
+      <span class="file-name" id="fileName"></span>
+    </div>
+    <nav class="actions" aria-label="Datei">
+      <button id="btnNew" title="Neues Modell">Neu</button>
+      <button id="btnOpen" title="JSON Schema oder OpenAPI öffnen (Strg+O)">Öffnen…</button>
+      <button id="btnSave" class="primary" title="Als JSON Schema speichern (Strg+S)">Speichern</button>
+      <div class="menu">
+        <button id="btnExport" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+        <div class="menu-list" id="exportMenu" hidden>
+          <button data-export="schema">JSON Schema 2020-12 (.schema.json)</button>
+          <button data-export="openapi">OpenAPI 3.1 (.openapi.json)</button>
+          <button data-export="example">Beispiel-Instanz (.json)</button>
+        </div>
+      </div>
+      <span class="sep"></span>
+      <button id="btnUndo" title="Rückgängig (Strg+Z)" aria-label="Rückgängig">↶</button>
+      <button id="btnRedo" title="Wiederholen (Strg+Umschalt+Z)" aria-label="Wiederholen">↷</button>
+      <button id="btnSample" title="Beispielmodell laden">Beispiel</button>
+    </nav>
+    <input type="file" id="fileInput" accept=".json,application/json,application/schema+json" hidden>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="nav-item model-item" id="navModel">
+        <span class="nav-icon" aria-hidden="true">◆</span><span id="navModelTitle">Modell</span>
+      </button>
+      <div class="sidebar-head">
+        <span>Entitäten</span>
+        <button id="btnAddEntity" class="small" title="Entität hinzufügen">+ Neu</button>
+      </div>
+      <input type="search" id="entityFilter" placeholder="Filtern…" aria-label="Entitäten filtern">
+      <ul class="entity-list" id="entityList"></ul>
+    </aside>
+
+    <main class="main">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="editor" class="active">Editor</button>
+        <button role="tab" data-tab="diagram">Diagramm</button>
+        <button role="tab" data-tab="json">JSON</button>
+        <button role="tab" data-tab="example">Beispieldaten</button>
+      </div>
+      <section class="view" id="view"></section>
+    </main>
+
+    <aside class="issues" id="issuesPanel">
+      <h2>Prüfung <span class="badge" id="issueCount">0</span></h2>
+      <ul id="issueList"></ul>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="askDialog" aria-labelledby="askTitle">
+    <form method="dialog">
+      <h2 id="askTitle"></h2>
+      <p id="askText"></p>
+      <div class="dialog-actions">
+        <button value="cancel" id="askCancel">Abbrechen</button>
+        <button value="ok" id="askOk" class="primary">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="exportDialog" class="wide" aria-labelledby="exportTitle">
+    <form method="dialog">
+      <h2 id="exportTitle">Export: <span id="exportName"></span></h2>
+      <textarea id="exportText" class="code" rows="16" readonly spellcheck="false"></textarea>
+      <div class="dialog-actions">
+        <button value="close">Schließen</button>
+        <button type="button" id="exportDownload">Herunterladen</button>
+        <button type="button" id="exportCopy" class="primary">Kopieren</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="src/model.js"></script>
+  <script src="src/diagram.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

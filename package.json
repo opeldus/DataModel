@@ -1,0 +1,11 @@
+{
+  "name": "datamodel-editor",
+  "version": "0.1.0",
+  "description": "Browser-Editor für Datenmodelle als JSON Schema 2020-12 mit Export nach OpenAPI 3.1",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node --test \"test/*.test.js\""
+  }
+}

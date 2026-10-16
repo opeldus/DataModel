@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/bibliothek.schema.json",
+  "title": "Bibliothek",
+  "description": "Beispielmodell einer kleinen Bibliothek mit Büchern, Autorinnen und Ausleihen.",
+  "$defs": {
+    "Buch": {
+      "type": "object",
+      "title": "Buch",
+      "description": "Ein Titel im Bestand der Bibliothek.",
+      "properties": {
+        "id": { "type": "string", "format": "uuid", "description": "Eindeutige Kennung", "readOnly": true },
+        "isbn": { "type": "string", "description": "ISBN-13", "pattern": "^97[89][0-9]{10}$" },
+        "titel": { "type": "string", "description": "Titel des Buchs", "minLength": 1, "maxLength": 300 },
+        "erscheinungsjahr": { "type": "integer", "minimum": 1450, "maximum": 2100 },
+        "sprache": { "type": "string", "description": "Sprachcode nach ISO 639-1", "enum": ["de", "en", "fr", "es"], "default": "de" },
+        "autoren": { "type": "array", "description": "Beteiligte Autorinnen und Autoren", "minItems": 1, "items": { "$ref": "#/$defs/Person" } },
+        "verlag": { "$ref": "#/$defs/Verlag", "description": "Herausgebender Verlag" },
+        "schlagworte": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      },
+      "required": ["id", "isbn", "titel", "autoren"],
+      "additionalProperties": false
+    },
+    "Person": {
+      "type": "object",
+      "title": "Person",
+      "properties": {
+        "id": { "type": "string", "format": "uuid", "readOnly": true },
+        "vorname": { "type": "string" },
+        "nachname": { "type": "string" },
+        "geburtsdatum": { "type": ["string", "null"], "format": "date" },
+        "website": { "type": "string", "format": "uri" }
+      },
+      "required": ["id", "nachname"]
+    },
+    "Verlag": {
+      "type": "object",
+      "title": "Verlag",
+      "properties": {
+        "name": { "type": "string" },
+        "ort": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Mitglied": {
+      "type": "object",
+      "title": "Mitglied",
+      "description": "Eingetragenes Mitglied mit Ausweis.",
+      "properties": {
+        "ausweisnummer": { "type": "string", "pattern": "^[A-Z]{2}[0-9]{6}$" },
+        "person": { "$ref": "#/$defs/Person" },
+        "email": { "type": "string", "format": "email" },
+        "aktiv": { "type": "boolean", "default": true }
+      },
+      "required": ["ausweisnummer", "person", "email"]
+    },
+    "Ausleihe": {
+      "type": "object",
+      "title": "Ausleihe",
+      "properties": {
+        "buch": { "$ref": "#/$defs/Buch" },
+        "mitglied": { "$ref": "#/$defs/Mitglied" },
+        "ausgeliehenAm": { "type": "string", "format": "date-time" },
+        "faelligAm": { "type": "string", "format": "date" },
+        "zurueckgegebenAm": { "type": ["string", "null"], "format": "date-time" },
+        "verlaengerungen": { "type": "integer", "minimum": 0, "maximum": 3, "default": 0 }
+      },
+      "required": ["buch", "mitglied", "ausgeliehenAm", "faelligAm"]
+    }
+  }
+}
