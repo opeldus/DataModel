@@ -1,0 +1,112 @@
+{
+  "formatVersion": "1.0.0",
+  "model": {
+    "id": "6f1c2a10-0000-4000-8000-000000000001",
+    "name": "Kredit Kernmodell",
+    "version": "0.1.0",
+    "level": "physisch",
+    "targetPlatform": "snowflake",
+    "description": "Beispielmodell: Geschäftspartner und Kreditverträge.",
+    "governance": {
+      "status": "entwurf",
+      "owner": "Domäne Kredit",
+      "regulatoryTags": ["BCBS239"]
+    }
+  },
+  "domains": [
+    {
+      "id": "6f1c2a10-0000-4000-8000-000000000010",
+      "name": "Kredit",
+      "owner": "Domäne Kredit"
+    }
+  ],
+  "entities": [
+    {
+      "id": "6f1c2a10-0000-4000-8000-000000000100",
+      "name": "Geschäftspartner",
+      "physicalName": "GESCHAEFTSPARTNER",
+      "schema": "CORE",
+      "domainId": "6f1c2a10-0000-4000-8000-000000000010",
+      "classification": "vertraulich",
+      "attributes": [
+        {
+          "id": "6f1c2a10-0000-4000-8000-000000000101",
+          "name": "Geschäftspartner-ID",
+          "physicalName": "GP_ID",
+          "dataType": { "type": "string", "length": 20, "nativeType": "VARCHAR(20)" },
+          "nullable": false,
+          "ordinalPosition": 1
+        },
+        {
+          "id": "6f1c2a10-0000-4000-8000-000000000102",
+          "name": "Name",
+          "physicalName": "NAME",
+          "dataType": { "type": "string", "length": 200 },
+          "classification": "vertraulich",
+          "ordinalPosition": 2
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_GESCHAEFTSPARTNER",
+        "attributeIds": ["6f1c2a10-0000-4000-8000-000000000101"]
+      }
+    },
+    {
+      "id": "6f1c2a10-0000-4000-8000-000000000200",
+      "name": "Kreditvertrag",
+      "physicalName": "KREDITVERTRAG",
+      "schema": "CORE",
+      "domainId": "6f1c2a10-0000-4000-8000-000000000010",
+      "dataProduct": "Kreditbestand",
+      "attributes": [
+        {
+          "id": "6f1c2a10-0000-4000-8000-000000000201",
+          "name": "Vertragsnummer",
+          "physicalName": "VERTRAG_NR",
+          "dataType": { "type": "string", "length": 30 },
+          "nullable": false,
+          "ordinalPosition": 1
+        },
+        {
+          "id": "6f1c2a10-0000-4000-8000-000000000202",
+          "name": "Geschäftspartner-ID",
+          "physicalName": "GP_ID",
+          "dataType": { "type": "string", "length": 20 },
+          "nullable": false,
+          "ordinalPosition": 2
+        },
+        {
+          "id": "6f1c2a10-0000-4000-8000-000000000203",
+          "name": "Nominalbetrag",
+          "physicalName": "NOMINAL_BETRAG",
+          "dataType": { "type": "decimal", "precision": 18, "scale": 2, "nativeType": "NUMBER(18,2)" },
+          "ordinalPosition": 3,
+          "extensions": { "x-einheit": "EUR" }
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_KREDITVERTRAG",
+        "attributeIds": ["6f1c2a10-0000-4000-8000-000000000201"]
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "6f1c2a10-0000-4000-8000-000000000900",
+      "name": "FK_KREDITVERTRAG_GP",
+      "description": "Ein Geschäftspartner hat 0..n Kreditverträge.",
+      "from": {
+        "entityId": "6f1c2a10-0000-4000-8000-000000000200",
+        "attributeIds": ["6f1c2a10-0000-4000-8000-000000000202"],
+        "cardinality": "0..n"
+      },
+      "to": {
+        "entityId": "6f1c2a10-0000-4000-8000-000000000100",
+        "attributeIds": ["6f1c2a10-0000-4000-8000-000000000101"],
+        "cardinality": "1"
+      },
+      "identifying": false,
+      "enforced": false
+    }
+  ]
+}

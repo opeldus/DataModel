@@ -1,0 +1,626 @@
+{
+  "formatVersion": "1.0.0",
+  "model": {
+    "id": "6a8ac706-f850-51b5-a5ff-4cd75b0bdc5c",
+    "name": "Kreditbestand",
+    "version": "0.3.0",
+    "level": "physisch",
+    "targetPlatform": "snowflake",
+    "description": "Beispielmodell: Geschäftspartner, Kreditverträge, Zahlungsströme und Sicherheiten.",
+    "governance": {
+      "status": "in_pruefung",
+      "owner": "Domäne Kredit",
+      "regulatoryTags": [
+        "BCBS239"
+      ]
+    }
+  },
+  "domains": [
+    {
+      "id": "905affc9-8776-561d-8e72-d17aa821257d",
+      "name": "Kredit",
+      "owner": "Domäne Kredit"
+    },
+    {
+      "id": "57e904c0-7c51-500b-83af-5b5c9a635a8a",
+      "name": "Referenzdaten",
+      "owner": "Zentrale Stammdaten"
+    }
+  ],
+  "entities": [
+    {
+      "id": "4e9c9711-b2d3-597f-8051-ac301c50c903",
+      "name": "Geschäftspartner",
+      "physicalName": "GESCHAEFTSPARTNER",
+      "schema": "CORE",
+      "domainId": "905affc9-8776-561d-8e72-d17aa821257d",
+      "attributes": [
+        {
+          "id": "56e2acd1-1911-58e8-aadb-c1731e96087b",
+          "name": "Geschäftspartner-ID",
+          "physicalName": "GP_ID",
+          "dataType": {
+            "type": "string",
+            "length": 20
+          },
+          "ordinalPosition": 1,
+          "nullable": false
+        },
+        {
+          "id": "f793ee9a-a6d7-5719-9fb5-246673594a89",
+          "name": "Name",
+          "physicalName": "NAME",
+          "dataType": {
+            "type": "string",
+            "length": 200
+          },
+          "ordinalPosition": 2,
+          "nullable": false,
+          "classification": "vertraulich"
+        },
+        {
+          "id": "d2c7e923-cead-5c9f-82fc-b4bffe3da2b5",
+          "name": "Rechtsform",
+          "physicalName": "RECHTSFORM",
+          "dataType": {
+            "type": "string",
+            "length": 10
+          },
+          "ordinalPosition": 3
+        },
+        {
+          "id": "0c6b3680-5e5c-54d2-809b-b5d73125bd22",
+          "name": "Sitzland",
+          "physicalName": "LAND_ISO",
+          "dataType": {
+            "type": "string",
+            "length": 2
+          },
+          "ordinalPosition": 4,
+          "description": "ISO-3166-Ländercode des Sitzes"
+        },
+        {
+          "id": "f418f4b8-482a-51b0-ad5c-cf7785a78764",
+          "name": "LEI",
+          "physicalName": "LEI",
+          "dataType": {
+            "type": "string",
+            "length": 20
+          },
+          "ordinalPosition": 5,
+          "description": "Legal Entity Identifier"
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_GESCHAEFTSPARTNER",
+        "attributeIds": [
+          "56e2acd1-1911-58e8-aadb-c1731e96087b"
+        ]
+      },
+      "classification": "vertraulich",
+      "description": "Kunden und Kontrahenten der Bank",
+      "uniqueKeys": [
+        {
+          "name": "UK_GP_LEI",
+          "attributeIds": [
+            "f418f4b8-482a-51b0-ad5c-cf7785a78764"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b6f20702-e793-526f-94a7-ce02a7c2d7cf",
+      "name": "Kreditvertrag",
+      "physicalName": "KREDITVERTRAG",
+      "schema": "CORE",
+      "domainId": "905affc9-8776-561d-8e72-d17aa821257d",
+      "attributes": [
+        {
+          "id": "077d1a81-e517-50e1-b82f-1ed49c2771ca",
+          "name": "Vertragsnummer",
+          "physicalName": "VERTRAG_NR",
+          "dataType": {
+            "type": "string",
+            "length": 30
+          },
+          "ordinalPosition": 1,
+          "nullable": false
+        },
+        {
+          "id": "dcc6b411-0a8a-54f8-b52f-5ec16bc25851",
+          "name": "Geschäftspartner-ID",
+          "physicalName": "GP_ID",
+          "dataType": {
+            "type": "string",
+            "length": 20
+          },
+          "ordinalPosition": 2,
+          "nullable": false
+        },
+        {
+          "id": "8ba7222b-1e08-5569-9f28-d1bb562a2b36",
+          "name": "Produktart",
+          "physicalName": "PRODUKTART",
+          "dataType": {
+            "type": "string",
+            "length": 20
+          },
+          "ordinalPosition": 3
+        },
+        {
+          "id": "26b3e332-b30e-536e-ab27-cca578629cca",
+          "name": "Nominalbetrag",
+          "physicalName": "NOMINAL_BETRAG",
+          "dataType": {
+            "type": "decimal",
+            "precision": 18,
+            "scale": 2,
+            "nativeType": "NUMBER(18,2)"
+          },
+          "ordinalPosition": 4,
+          "nullable": false
+        },
+        {
+          "id": "246f478f-94ef-50a7-9ef0-e747d7fd47cc",
+          "name": "Währung",
+          "physicalName": "WAEHRUNG_ISO",
+          "dataType": {
+            "type": "string",
+            "length": 3
+          },
+          "ordinalPosition": 5,
+          "nullable": false
+        },
+        {
+          "id": "4062cd53-ac02-566e-8d86-a290bc6ffc20",
+          "name": "Vertragsbeginn",
+          "physicalName": "BEGINN_DATUM",
+          "dataType": {
+            "type": "date"
+          },
+          "ordinalPosition": 6,
+          "nullable": false
+        },
+        {
+          "id": "42fb1eef-fa20-5859-9abf-6f4f94e6c1c0",
+          "name": "Fälligkeit",
+          "physicalName": "FAELLIGKEIT_DATUM",
+          "dataType": {
+            "type": "date"
+          },
+          "ordinalPosition": 7
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_KREDITVERTRAG",
+        "attributeIds": [
+          "077d1a81-e517-50e1-b82f-1ed49c2771ca"
+        ]
+      },
+      "dataProduct": "Kreditbestand",
+      "governance": {
+        "status": "freigegeben",
+        "owner": "Domäne Kredit",
+        "regulatoryTags": [
+          "BCBS239"
+        ]
+      }
+    },
+    {
+      "id": "60d56d16-9dc1-5a24-9bd4-1d72d5bd2f0b",
+      "name": "Zahlungsstrom",
+      "physicalName": "ZAHLUNGSSTROM",
+      "schema": "CORE",
+      "domainId": "905affc9-8776-561d-8e72-d17aa821257d",
+      "attributes": [
+        {
+          "id": "96464af9-7672-5e0c-bc6e-58c5c95fac37",
+          "name": "Vertragsnummer",
+          "physicalName": "VERTRAG_NR",
+          "dataType": {
+            "type": "string",
+            "length": 30
+          },
+          "ordinalPosition": 1,
+          "nullable": false
+        },
+        {
+          "id": "def1683d-2231-53e7-be9f-bc05cd68aa78",
+          "name": "Laufende Nummer",
+          "physicalName": "LFD_NR",
+          "dataType": {
+            "type": "integer"
+          },
+          "ordinalPosition": 2,
+          "nullable": false
+        },
+        {
+          "id": "cba1d206-e074-592f-bf23-c35efb3da6e6",
+          "name": "Valuta",
+          "physicalName": "VALUTA_DATUM",
+          "dataType": {
+            "type": "date"
+          },
+          "ordinalPosition": 3,
+          "nullable": false
+        },
+        {
+          "id": "c3c881e9-9e4a-53ca-a9a1-3eac97d2dd2d",
+          "name": "Zahlungsart",
+          "physicalName": "ZAHLUNGSART",
+          "dataType": {
+            "type": "string",
+            "length": 10
+          },
+          "ordinalPosition": 4,
+          "nullable": false,
+          "description": "Tilgung, Zins oder Gebühr"
+        },
+        {
+          "id": "8d1e73b1-e899-5316-a8ee-0cfe797fd298",
+          "name": "Betrag",
+          "physicalName": "BETRAG",
+          "dataType": {
+            "type": "decimal",
+            "precision": 18,
+            "scale": 2,
+            "nativeType": "NUMBER(18,2)"
+          },
+          "ordinalPosition": 5,
+          "nullable": false
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_ZAHLUNGSSTROM",
+        "attributeIds": [
+          "96464af9-7672-5e0c-bc6e-58c5c95fac37",
+          "def1683d-2231-53e7-be9f-bc05cd68aa78"
+        ]
+      },
+      "dataProduct": "Kreditbestand",
+      "description": "Geplante Cashflows je Vertrag"
+    },
+    {
+      "id": "0f5a255c-9a3e-5001-a03f-0f97747f0899",
+      "name": "Sicherheit",
+      "physicalName": "SICHERHEIT",
+      "schema": "CORE",
+      "domainId": "905affc9-8776-561d-8e72-d17aa821257d",
+      "attributes": [
+        {
+          "id": "78573f34-7fb1-55cb-8512-60161ddede0e",
+          "name": "Sicherheiten-ID",
+          "physicalName": "SICHERHEIT_ID",
+          "dataType": {
+            "type": "string",
+            "length": 20
+          },
+          "ordinalPosition": 1,
+          "nullable": false
+        },
+        {
+          "id": "f5e5f66f-db41-58eb-934b-c111deda08ce",
+          "name": "Sicherheitenart",
+          "physicalName": "ART",
+          "dataType": {
+            "type": "string",
+            "length": 20
+          },
+          "ordinalPosition": 2,
+          "nullable": false
+        },
+        {
+          "id": "1d3ee121-b0aa-56f7-90a8-30a34700d745",
+          "name": "Marktwert",
+          "physicalName": "MARKTWERT",
+          "dataType": {
+            "type": "decimal",
+            "precision": 18,
+            "scale": 2,
+            "nativeType": "NUMBER(18,2)"
+          },
+          "ordinalPosition": 3
+        },
+        {
+          "id": "2bf3d2c2-e7f6-57c6-bb47-56808d3b592b",
+          "name": "Währung",
+          "physicalName": "WAEHRUNG_ISO",
+          "dataType": {
+            "type": "string",
+            "length": 3
+          },
+          "ordinalPosition": 4,
+          "nullable": false
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_SICHERHEIT",
+        "attributeIds": [
+          "78573f34-7fb1-55cb-8512-60161ddede0e"
+        ]
+      }
+    },
+    {
+      "id": "ffce9d50-1686-5ad5-b7e6-0f01de11410a",
+      "name": "Sicherheitenzuordnung",
+      "physicalName": "SICHERHEITENZUORDNUNG",
+      "schema": "CORE",
+      "domainId": "905affc9-8776-561d-8e72-d17aa821257d",
+      "attributes": [
+        {
+          "id": "cfb6ac21-6063-53fe-a1b0-d5ffeeb4c06d",
+          "name": "Vertragsnummer",
+          "physicalName": "VERTRAG_NR",
+          "dataType": {
+            "type": "string",
+            "length": 30
+          },
+          "ordinalPosition": 1,
+          "nullable": false
+        },
+        {
+          "id": "d95a5193-d202-51d1-80f2-66b052dcb040",
+          "name": "Sicherheiten-ID",
+          "physicalName": "SICHERHEIT_ID",
+          "dataType": {
+            "type": "string",
+            "length": 20
+          },
+          "ordinalPosition": 2,
+          "nullable": false
+        },
+        {
+          "id": "fc2ff393-330a-5883-9e25-53bd2135d387",
+          "name": "Anrechnungsquote",
+          "physicalName": "QUOTE",
+          "dataType": {
+            "type": "decimal",
+            "precision": 5,
+            "scale": 4,
+            "nativeType": "NUMBER(5,4)"
+          },
+          "ordinalPosition": 3,
+          "description": "Anteil 0 bis 1"
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_SICHERHEITENZUORDNUNG",
+        "attributeIds": [
+          "cfb6ac21-6063-53fe-a1b0-d5ffeeb4c06d",
+          "d95a5193-d202-51d1-80f2-66b052dcb040"
+        ]
+      },
+      "description": "Welche Sicherheit welchen Vertrag besichert"
+    },
+    {
+      "id": "c9a2191a-3394-58a2-a391-425447a415a2",
+      "name": "Währung",
+      "physicalName": "WAEHRUNG",
+      "schema": "CORE",
+      "domainId": "57e904c0-7c51-500b-83af-5b5c9a635a8a",
+      "attributes": [
+        {
+          "id": "6f01e143-cd5e-583b-8647-775d0a29c655",
+          "name": "ISO-Code",
+          "physicalName": "WAEHRUNG_ISO",
+          "dataType": {
+            "type": "string",
+            "length": 3
+          },
+          "ordinalPosition": 1,
+          "nullable": false
+        },
+        {
+          "id": "b982ec03-7559-58ff-9a03-c99cea4e4840",
+          "name": "Bezeichnung",
+          "physicalName": "BEZEICHNUNG",
+          "dataType": {
+            "type": "string",
+            "length": 60
+          },
+          "ordinalPosition": 2,
+          "nullable": false
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_WAEHRUNG",
+        "attributeIds": [
+          "6f01e143-cd5e-583b-8647-775d0a29c655"
+        ]
+      },
+      "classification": "oeffentlich"
+    },
+    {
+      "id": "29f3dbf3-be5c-5f3c-ae27-31dff7ba9599",
+      "name": "Land",
+      "physicalName": "LAND",
+      "schema": "CORE",
+      "domainId": "57e904c0-7c51-500b-83af-5b5c9a635a8a",
+      "attributes": [
+        {
+          "id": "017d3234-7d6f-512b-87da-23c3359bb789",
+          "name": "ISO-Code",
+          "physicalName": "LAND_ISO",
+          "dataType": {
+            "type": "string",
+            "length": 2
+          },
+          "ordinalPosition": 1,
+          "nullable": false
+        },
+        {
+          "id": "c4143acb-6f7d-5889-881f-31a319cdf0d7",
+          "name": "Bezeichnung",
+          "physicalName": "BEZEICHNUNG",
+          "dataType": {
+            "type": "string",
+            "length": 80
+          },
+          "ordinalPosition": 2,
+          "nullable": false
+        },
+        {
+          "id": "a345fd6c-5cb6-56e6-b4e6-ccedc6dfbcf4",
+          "name": "EWR-Mitglied",
+          "physicalName": "EWR_KZ",
+          "dataType": {
+            "type": "boolean"
+          },
+          "ordinalPosition": 3,
+          "nullable": false,
+          "defaultValue": false
+        }
+      ],
+      "primaryKey": {
+        "name": "PK_LAND",
+        "attributeIds": [
+          "017d3234-7d6f-512b-87da-23c3359bb789"
+        ]
+      },
+      "classification": "oeffentlich"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "787dd3e0-1ead-5d99-adbf-132a9a326cc2",
+      "name": "FK_KV_GP",
+      "from": {
+        "entityId": "b6f20702-e793-526f-94a7-ce02a7c2d7cf",
+        "attributeIds": [
+          "dcc6b411-0a8a-54f8-b52f-5ec16bc25851"
+        ],
+        "cardinality": "0..n"
+      },
+      "to": {
+        "entityId": "4e9c9711-b2d3-597f-8051-ac301c50c903",
+        "attributeIds": [
+          "56e2acd1-1911-58e8-aadb-c1731e96087b"
+        ],
+        "cardinality": "1"
+      },
+      "identifying": false,
+      "enforced": false,
+      "description": "Ein Geschäftspartner hat beliebig viele Kreditverträge."
+    },
+    {
+      "id": "959601c8-6e13-578c-a6d3-cdb25afe9934",
+      "name": "FK_ZS_KV",
+      "from": {
+        "entityId": "60d56d16-9dc1-5a24-9bd4-1d72d5bd2f0b",
+        "attributeIds": [
+          "96464af9-7672-5e0c-bc6e-58c5c95fac37"
+        ],
+        "cardinality": "1..n"
+      },
+      "to": {
+        "entityId": "b6f20702-e793-526f-94a7-ce02a7c2d7cf",
+        "attributeIds": [
+          "077d1a81-e517-50e1-b82f-1ed49c2771ca"
+        ],
+        "cardinality": "1"
+      },
+      "identifying": true,
+      "enforced": false
+    },
+    {
+      "id": "7a6813b0-b58d-588d-9526-32b0e67b64a2",
+      "name": "FK_SZ_KV",
+      "from": {
+        "entityId": "ffce9d50-1686-5ad5-b7e6-0f01de11410a",
+        "attributeIds": [
+          "cfb6ac21-6063-53fe-a1b0-d5ffeeb4c06d"
+        ],
+        "cardinality": "0..n"
+      },
+      "to": {
+        "entityId": "b6f20702-e793-526f-94a7-ce02a7c2d7cf",
+        "attributeIds": [
+          "077d1a81-e517-50e1-b82f-1ed49c2771ca"
+        ],
+        "cardinality": "1"
+      },
+      "identifying": true,
+      "enforced": false
+    },
+    {
+      "id": "281a17d4-0078-5935-9560-14714c096530",
+      "name": "FK_SZ_SI",
+      "from": {
+        "entityId": "ffce9d50-1686-5ad5-b7e6-0f01de11410a",
+        "attributeIds": [
+          "d95a5193-d202-51d1-80f2-66b052dcb040"
+        ],
+        "cardinality": "0..n"
+      },
+      "to": {
+        "entityId": "0f5a255c-9a3e-5001-a03f-0f97747f0899",
+        "attributeIds": [
+          "78573f34-7fb1-55cb-8512-60161ddede0e"
+        ],
+        "cardinality": "1"
+      },
+      "identifying": true,
+      "enforced": false
+    },
+    {
+      "id": "56a5c943-8699-5400-86d5-b6fefcf4da64",
+      "name": "FK_KV_WAE",
+      "from": {
+        "entityId": "b6f20702-e793-526f-94a7-ce02a7c2d7cf",
+        "attributeIds": [
+          "246f478f-94ef-50a7-9ef0-e747d7fd47cc"
+        ],
+        "cardinality": "0..n"
+      },
+      "to": {
+        "entityId": "c9a2191a-3394-58a2-a391-425447a415a2",
+        "attributeIds": [
+          "6f01e143-cd5e-583b-8647-775d0a29c655"
+        ],
+        "cardinality": "1"
+      },
+      "identifying": false,
+      "enforced": false
+    },
+    {
+      "id": "65fa3bf6-96dc-591b-b2f2-9ef8f5d67dc6",
+      "name": "FK_SI_WAE",
+      "from": {
+        "entityId": "0f5a255c-9a3e-5001-a03f-0f97747f0899",
+        "attributeIds": [
+          "2bf3d2c2-e7f6-57c6-bb47-56808d3b592b"
+        ],
+        "cardinality": "0..n"
+      },
+      "to": {
+        "entityId": "c9a2191a-3394-58a2-a391-425447a415a2",
+        "attributeIds": [
+          "6f01e143-cd5e-583b-8647-775d0a29c655"
+        ],
+        "cardinality": "1"
+      },
+      "identifying": false,
+      "enforced": false
+    },
+    {
+      "id": "c16e152f-eb5e-5fb0-b5cb-91959c573417",
+      "name": "FK_GP_LAND",
+      "from": {
+        "entityId": "4e9c9711-b2d3-597f-8051-ac301c50c903",
+        "attributeIds": [
+          "0c6b3680-5e5c-54d2-809b-b5d73125bd22"
+        ],
+        "cardinality": "0..n"
+      },
+      "to": {
+        "entityId": "29f3dbf3-be5c-5f3c-ae27-31dff7ba9599",
+        "attributeIds": [
+          "017d3234-7d6f-512b-87da-23c3359bb789"
+        ],
+        "cardinality": "0..1"
+      },
+      "identifying": false,
+      "enforced": false
+    }
+  ]
+}

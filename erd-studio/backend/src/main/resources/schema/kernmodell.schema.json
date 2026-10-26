@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/kernmodell/1.0/kernmodell.schema.json",
+  "title": "Kernmodell Datenmodellierung",
+  "description": "Herstellerneutrales Kernformat für logische/physische Datenmodelle. Austausch mit anderen Formaten (DDL, DBML, Mermaid, dbt, ODCS, DataHub) erfolgt ausschließlich über Adapter.",
+  "type": "object",
+  "required": ["formatVersion", "model", "entities"],
+  "additionalProperties": false,
+  "properties": {
+    "formatVersion": {
+      "description": "Version dieses Schemas (SemVer). Erlaubt Migrationen bei Formatänderungen.",
+      "type": "string",
+      "pattern": "^1\\.\\d+\\.\\d+$"
+    },
+    "model": { "$ref": "#/$defs/model" },
+    "domains": {
+      "description": "Fachliche Domänen (Data Mesh).",
+      "type": "array",
+      "items": { "$ref": "#/$defs/domain" }
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "relationships": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/relationship" }
+    },
+    "extensions": { "$ref": "#/$defs/extensions" }
+  },
+
+  "$defs": {
+    "id": {
+      "description": "Stabile, unveränderliche ID (UUID). Überlebt Umbenennungen.",
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+
+    "name": {
+      "description": "Fachlicher Name.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+
+    "physicalName": {
+      "description": "Technischer Name in der Zielplattform (z. B. Snowflake).",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_$]*$",
+      "maxLength": 255
+    },
+
+    "classification": {
+      "description": "Schutzbedarf / Vertraulichkeit.",
+      "type": "string",
+      "enum": ["oeffentlich", "intern", "vertraulich", "streng_vertraulich"]
+    },
+
+    "status": {
+      "description": "Lebenszyklus- und Freigabestatus.",
+      "type": "string",
+      "enum": ["entwurf", "in_pruefung", "freigegeben", "abgekuendigt"]
+    },
+
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "owner": { "type": "string", "description": "Verantwortliche Person oder Rolle." },
+        "steward": { "type": "string", "description": "Data Steward." },
+        "approvedBy": { "type": "string" },
+        "approvedAt": { "type": "string", "format": "date-time" },
+        "regulatoryTags": {
+          "description": "Regulatorische Relevanz, z. B. BCBS239, DSGVO.",
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    },
+
+    "extensions": {
+      "description": "Erweiterungsfelder für Informationen, die kein Zielformat kennt. Schlüssel müssen mit 'x-' beginnen (Namespace).",
+      "type": "object",
+      "propertyNames": { "pattern": "^x-[a-z0-9-]+$" }
+    },
+
+    "model": {
+      "type": "object",
+      "required": ["id", "name", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/name" },
+        "version": {
+          "description": "Fachliche Version des Modells (SemVer).",
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "level": {
+          "description": "Modellierungsebene.",
+          "type": "string",
+          "enum": ["konzeptionell", "logisch", "physisch"]
+        },
+        "targetPlatform": {
+          "description": "Zielplattform für physische Modelle.",
+          "type": "string",
+          "examples": ["snowflake", "postgres", "oracle"]
+        },
+        "description": { "type": "string" },
+        "governance": { "$ref": "#/$defs/governance" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "domain": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/name" },
+        "description": { "type": "string" },
+        "owner": { "type": "string" },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "dataType": {
+      "description": "Plattformneutraler Datentyp. Adapter übersetzen in den Zieldialekt.",
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "string", "integer", "decimal", "float", "boolean",
+            "date", "time", "timestamp", "timestamp_tz",
+            "binary", "json", "array", "uuid"
+          ]
+        },
+        "length": { "type": "integer", "minimum": 1 },
+        "precision": { "type": "integer", "minimum": 1, "maximum": 38 },
+        "scale": { "type": "integer", "minimum": 0, "maximum": 37 },
+        "nativeType": {
+          "description": "Originaltyp der Quelle, z. B. 'NUMBER(18,2)' (zur verlustfreien Rückübersetzung).",
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "decimal" } } },
+          "then": { "required": ["precision"] }
+        }
+      ]
+    },
+
+    "attribute": {
+      "type": "object",
+      "required": ["id", "name", "dataType"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/name" },
+        "physicalName": { "$ref": "#/$defs/physicalName" },
+        "description": { "type": "string" },
+        "dataType": { "$ref": "#/$defs/dataType" },
+        "nullable": { "type": "boolean", "default": true },
+        "defaultValue": { "type": ["string", "number", "boolean", "null"] },
+        "classification": { "$ref": "#/$defs/classification" },
+        "businessTerm": {
+          "description": "Verweis auf Glossarbegriff (z. B. DataHub-Glossary-URN).",
+          "type": "string"
+        },
+        "ordinalPosition": { "type": "integer", "minimum": 1 },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "key": {
+      "type": "object",
+      "required": ["attributeIds"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "attributeIds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+
+    "entity": {
+      "type": "object",
+      "required": ["id", "name", "attributes"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/name" },
+        "physicalName": { "$ref": "#/$defs/physicalName" },
+        "kind": {
+          "type": "string",
+          "enum": ["tabelle", "view", "materialisierte_view", "externe_tabelle"],
+          "default": "tabelle"
+        },
+        "schema": { "type": "string", "description": "Datenbankschema, z. B. 'CORE'." },
+        "database": { "type": "string" },
+        "domainId": { "$ref": "#/$defs/id" },
+        "dataProduct": { "type": "string", "description": "Zugehöriges Data Product." },
+        "description": { "type": "string" },
+        "classification": { "$ref": "#/$defs/classification" },
+        "governance": { "$ref": "#/$defs/governance" },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/attribute" },
+          "minItems": 1
+        },
+        "primaryKey": { "$ref": "#/$defs/key" },
+        "uniqueKeys": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/key" }
+        },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    },
+
+    "cardinality": {
+      "type": "string",
+      "enum": ["0..1", "1", "0..n", "1..n"]
+    },
+
+    "relationshipEnd": {
+      "type": "object",
+      "required": ["entityId", "attributeIds", "cardinality"],
+      "additionalProperties": false,
+      "properties": {
+        "entityId": { "$ref": "#/$defs/id" },
+        "attributeIds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "minItems": 1
+        },
+        "cardinality": { "$ref": "#/$defs/cardinality" }
+      }
+    },
+
+    "relationship": {
+      "description": "Beziehung von 'from' (Kind/FK-Seite) zu 'to' (Eltern/PK-Seite).",
+      "type": "object",
+      "required": ["id", "from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "from": { "$ref": "#/$defs/relationshipEnd" },
+        "to": { "$ref": "#/$defs/relationshipEnd" },
+        "identifying": {
+          "description": "Identifizierende Beziehung (FK ist Teil des PK).",
+          "type": "boolean",
+          "default": false
+        },
+        "enforced": {
+          "description": "In der Datenbank erzwungen (in Snowflake i. d. R. false = nur informativ).",
+          "type": "boolean",
+          "default": false
+        },
+        "extensions": { "$ref": "#/$defs/extensions" }
+      }
+    }
+  }
+}
