@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/DetailPanel.tsx","./src/Markers.tsx","./src/TableNode.tsx","./src/api.ts","./src/diagram.ts","./src/main.tsx","./src/types.ts","./src/editor/EntityEditor.tsx","./src/editor/ModelEditor.tsx","./src/editor/RelationshipEditor.tsx","./src/editor/fields.tsx","./src/editor/ops.ts","./src/editor/useHistory.ts","./vite.config.ts"],"version":"5.9.3"}

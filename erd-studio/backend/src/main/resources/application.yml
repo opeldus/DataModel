@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: erd-studio
+  jackson:
+    default-property-inclusion: non_null
+
+# Ablage der Modelldateien (ein Modell = eine JSON-Datei). Kann ein Git-Arbeitsverzeichnis sein.
+erd:
+  model-dir: ./models
